@@ -1,22 +1,42 @@
+// Requires
 const fileSystem = require('fs');
+const parser = require('./directory-name-parser');
 
-let pathName = ".test";
+// Member variables
+let defaultPath = ".test";
 
-function readDirectory(dirPath, startCallback, endCallback)
+// Directory data object constructor.
+function DirectoryData(stringToParse)
 {
-    if(typeof dirPath       !== "string")   return false;
-    if(typeof startCallback !== "function") return false;
-    if(typeof endCallback   !== "function") return false;
+    console.log(stringToParse);
 
-    if(dirPath.length <= 0) dirPath = pathName;
+    let stringArray = parser.break(stringToParse);
 
-    console.log("Beginning file reading " + process.cwd() + "/" + dirPath + "..");
-
-    startCallback();
-
-    fileSystem.readdir(dirPath, endCallback);
-
-    return true;
+    stringArray.forEach(
+        (string, index) => { console.log("    " + string); }
+    )
 }
 
-module.exports.read = readDirectory;
+// Reads a directory using nodejs's filesystem library.
+function getDirectoryContents(dirPath)
+{
+    if(typeof dirPath !== "string")   return 0;
+
+    if(!dirPath) dirPath = defaultPath;
+
+    console.log("Beginning file reading " + process.cwd() + "/" + dirPath);
+
+    let dirArray = [];
+
+    fileSystem.readdir(dirPath, (error, files) => {
+            if(error) throw error;
+
+            dirArray = files.map((dirString) => new DirectoryData(dirString));
+        }
+    );
+
+    return dirArray;
+}
+
+// Exports
+module.exports.read = getDirectoryContents;
